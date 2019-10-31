@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from .email_serializers import SendEmailSerializer, SendEmailResponseSerializer
 from .sms_serializers import SendSmsSerializer, SendSmsResponseSerializer
+from .phone_verification import generate_verification_code
 import requests
 import json
 
@@ -70,14 +71,12 @@ class SendEmail(APIView):
             ]
         }
         result = mailjet.send.create(data=data)
-        if result.status_code == 200:
-          return Response(data=result.json(), status=result.status_code)
-        
-        return Response({'error': result.json()}, status=result.status_code)
+        response_data = {
+          'status': result.status_code,
+          'message': result.json()
+        }
+        return Response(data=response_data, status=result.status_code)
 
-# @api_view(['POST'])
-# def send_mail(request):
-    
 
 class SendSms(APIView):
     @swagger_auto_schema(
@@ -109,7 +108,11 @@ class SendSms(APIView):
 
         result = requests.post(url, headers=headers, json=data)
 
-        if result.status_code == 200:
-          return Response(data=result.json(), status=result.status_code)
-        
-        return Response({'error': result.json()}, status=result.status_code)
+        response_data = {
+          'status': result.status_code,
+          'message': {
+            'veification_code': generate_verification_code(),
+            'res': result.json()
+          }
+        }
+        return Response(data=response_data, status=result.status_code)

@@ -32,5 +32,6 @@ urlpatterns = [
     # Admin urls
     path('admin/', admin.site.urls),
     # Default urls
-    path('/', index)
+    # path('/', index)  
+    url(r'^$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui')
 ]

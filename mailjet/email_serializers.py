@@ -7,4 +7,5 @@ class SendEmailSerializer(serializers.Serializer):
     to_name = serializers.CharField(required=True)
 
 class SendEmailResponseSerializer(serializers.Serializer):
-    Messages = serializers.ListField()
+    status = serializers.IntegerField()
+    message = serializers.ListField()
