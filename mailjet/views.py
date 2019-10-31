@@ -96,15 +96,20 @@ class SendSms(APIView):
         
         url = 'https://api.mailjet.com/v4/sms-send'
 
+        body = request.data
         headers = {
             'Authorization': 'Bearer {sms_token}'.format(sms_token=setting.mj_token),
             'Content-type': 'application/json'
         }
         data = {
-            'From': setting.from_title, #'SMS Sender',
-            'To': request.body['to_number'], #'+8617624152773',
-            'Text': setting.text_content #'Hi!!!'
+            'From': setting.from_title,
+            'To': body['to_telnumber'],
+            'Text': setting.text_content #? must be replaced with verification code
         }
 
         result = requests.post(url, headers=headers, json=data)
-        return Response(result)
+
+        if result.status_code == 200:
+          return Response(data=result.json(), status=result.status_code)
+        
+        return Response({'error': result.json()}, status=result.status_code)

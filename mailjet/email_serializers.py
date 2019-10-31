@@ -3,9 +3,8 @@ from drf_yasg.utils import swagger_serializer_method
 from .models import *
 
 class SendEmailSerializer(serializers.Serializer):
-    to_email = serializers.CharField(required=False)
-    to_name = serializers.CharField(required=False)
+    to_email = serializers.CharField(required=True)
+    to_name = serializers.CharField(required=True)
 
 class SendEmailResponseSerializer(serializers.Serializer):
-    start_date = serializers.CharField(required=False)
-    end_date = serializers.CharField(required=False)
+    Messages = serializers.ListField()
