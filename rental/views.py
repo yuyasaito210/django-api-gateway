@@ -173,8 +173,10 @@ class LendCabinetCallback(APIView):
     '''
     Callback API of lend cabinet
     '''
-    print('==== lend callback: ', request)
-    response_code = int(request.data['code'])
+    print('==== lend callback: ', request.data)
+    response_code = 405
+    if code in request.data:
+       code = int(request.data['code'])
     
     if response_code == 200:
       # Implement Push notification
