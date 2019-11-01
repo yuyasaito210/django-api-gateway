@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^apis/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     url(r'^swagger-docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),  
     url(r'^api/v1/mailjet/', include('mailjet.urls')),
+    url(r'^api/v1/payment/', include('payment.urls')),
     # Admin urls
     path('admin/', admin.site.urls),
     # Default urls

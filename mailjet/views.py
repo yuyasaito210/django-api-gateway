@@ -30,20 +30,8 @@ class SendEmail(APIView):
             data={
               'error': 'API gateway don\'t have any mail settings, yet. Please contact administrator.'
             },
-            status=404
+            status=503
           )
-          # setting = MailSetting(
-          #     api_key='e07ff605b7266ba50ca82289887e7690',
-          #     secret_key='d47a84b804a896061aa2c95dd0fba9af',
-          #     from_email='ninjadev999@gmail.com',
-          #     from_name='SMS Sender',
-          #     to_email='br-invin89@hotmail.com',
-          #     to_name='You',
-          #     subject='My first Mailjet Email!',
-          #     text_content='Greetings from Mailjet!',
-          #     html_content='<h3>Dear passenger 1, welcome to <a href=\'https://www.mailjet.com/\'>Mailjet</a>!</h3><br />May the delivery force be with you!'
-          # )
-          # setting.save()
 
         api_key = setting.api_key
         secret_key = setting.secret_key
@@ -90,7 +78,7 @@ class SendSms(APIView):
                 data={
                   'error': 'API gateway don\'t have any sms settings, yet. Please contact administrator.'
                 },
-                status=404
+                status=503
             )
         
         url = 'https://api.mailjet.com/v4/sms-send'
