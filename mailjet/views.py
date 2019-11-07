@@ -80,7 +80,9 @@ class SendSms(APIView):
                 },
                 status=503
             )
-        
+        # Generate verification code
+        verification_code = generate_verification_code()
+
         url = 'https://api.mailjet.com/v4/sms-send'
 
         body = request.data
@@ -91,7 +93,7 @@ class SendSms(APIView):
         data = {
             'From': setting.from_title,
             'To': body['to_telnumber'],
-            'Text': setting.text_content #? must be replaced with verification code
+            'Text': verification_code
         }
 
         result = requests.post(url, headers=headers, json=data)
@@ -99,7 +101,7 @@ class SendSms(APIView):
         response_data = {
           'status': result.status_code,
           'message': {
-            'veification_code': generate_verification_code(),
+            'veification_code': verification_code,
             'res': result.json()
           }
         }
