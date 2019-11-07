@@ -52,7 +52,8 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'mailjet',
-    'payment'
+    'payment',
+    'rental'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

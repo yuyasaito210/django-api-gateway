@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^swagger-docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),  
     url(r'^api/v1/mailjet/', include('mailjet.urls')),
     url(r'^api/v1/payment/', include('payment.urls')),
+    url(r'^api/v1/rental/', include('rental.urls')),
     # Admin urls
     path('admin/', admin.site.urls),
     # Default urls
