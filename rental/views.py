@@ -21,7 +21,6 @@ class GetRentalServer(APIView):
         Get rental server info
         '''
         # Filter talents according to search condition
-        body = request.data
         setting = RentalServerSetting.objects.all().first()
         if setting is None:
           raise Response(
@@ -44,4 +43,4 @@ class GetRentalServer(APIView):
           'status': 200,
           'message': data
         }
-        return Response(data=response_data, status=result.status_code)
+        return Response(data=response_data, status=200)
