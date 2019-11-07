@@ -105,4 +105,7 @@ class SendSms(APIView):
             'res': result.json()
           }
         }
+        print('===== phone number: ', body['to_telnumber'])
+        print('===== verification code: ', verification_code)
+        print('===== response: ', response_data)
         return Response(data=response_data, status=result.status_code)
