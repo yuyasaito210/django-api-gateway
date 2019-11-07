@@ -101,7 +101,7 @@ class SendSms(APIView):
         response_data = {
           'status': result.status_code,
           'message': {
-            'veification_code': verification_code,
+            'verification_code': verification_code,
             'res': result.json()
           }
         }
