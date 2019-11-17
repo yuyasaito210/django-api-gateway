@@ -9,6 +9,7 @@ class RentalServerSetting(models.Model):
     user_name = models.CharField(max_length=100, blank=False, default='')
     password = models.CharField(max_length=100, blank=False, default='')
     sign = models.CharField(max_length=100, blank=False, default='')
+    callback_base_url = models.CharField(max_length=100, blank=False, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
