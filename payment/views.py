@@ -23,6 +23,7 @@ class StripePayment(APIView):
         '''
         Checkout on Stripe payment
         '''
+        print('==== processing request')
         stripe_setting = StripeSetting.objects.all().first()
         if stripe_setting is None:
           raise Response(
@@ -31,14 +32,17 @@ class StripePayment(APIView):
             },
             status=503
           )
+        print('==== stripe_setting.is_live_mode: ', stripe_setting.is_live_mode)
         if stripe_setting.is_live_mode:
           stripe.api_key = stripe_setting.live_secret_key
         else:
           stripe.api_key = stripe_setting.test_secret_key
-        stripe.log = 'info'  # or 'debug'
-
+        stripe.log = 'debug'  # or 'info'
+        print('==== stripe.api_key: ', stripe.api_key)
         request_data = request.data
+        print('==== request_data: ', request_data)
         try:
+          print('==== charging: ')
           charge = stripe.Charge.create(
               amount=request_data['amount'],
               currency=request_data['currency'],
@@ -46,8 +50,8 @@ class StripePayment(APIView):
               description=request_data['description'] if request_data['description'] else 'Nono application',
               statement_descriptor='22 Characters max',
               metadata={
-                'email': request.data['email'],
-                'telnumber': request.data['telnumber']
+                'email': request_data['email'],
+                'telnumber': request_data['telnumber']
               }
           )
 
