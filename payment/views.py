@@ -46,7 +46,7 @@ class StripePayment(APIView):
           charge = stripe.Charge.create(
               amount=request_data['amount'],
               currency=request_data['currency'],
-              source=request_data['source'],
+              source=request_data['token'],
               description=request_data['description'] if request_data['description'] else 'Nono application',
               statement_descriptor='22 Characters max',
               metadata={
