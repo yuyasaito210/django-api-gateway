@@ -173,6 +173,7 @@ class LendCabinetCallback(APIView):
     '''
     Callback API of lend cabinet
     '''
+    print('==== lend callback data: ', request.data)
     response_code = int(request.data['code'])
     
     if response_code == 200:
