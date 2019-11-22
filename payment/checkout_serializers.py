@@ -7,7 +7,7 @@ class CheckoutSerializer(serializers.Serializer):
     telnumber = serializers.CharField(required=True)
     amount=serializers.IntegerField(required=True)
     currency=serializers.CharField(required=True)
-    token=serializers.CharField(required=True)
+    tokenId=serializers.CharField(required=True)
     description=serializers.CharField(required=False)
 
 class CheckoutResponseSerializer(serializers.Serializer):
