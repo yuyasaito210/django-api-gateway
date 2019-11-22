@@ -5,6 +5,8 @@ from .models import *
 class CheckoutSerializer(serializers.Serializer):
     email = serializers.CharField(required=True)
     telnumber = serializers.CharField(required=True)
+    stationSn = serializers.CharField(required=True)
+    slotId = serializers.CharField(required=True)
     amount=serializers.IntegerField(required=True)
     currency=serializers.CharField(required=True)
     tokenId=serializers.CharField(required=True)

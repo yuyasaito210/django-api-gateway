@@ -51,7 +51,9 @@ class StripePayment(APIView):
               statement_descriptor='22 Characters max',
               metadata={
                 'email': request_data['email'],
-                'telnumber': request_data['telnumber']
+                'telnumber': request_data['telnumber'],
+                'stationSn': request_data['stationSn'],
+                'slotId': request_data['slotId'],
               }
           )
 
