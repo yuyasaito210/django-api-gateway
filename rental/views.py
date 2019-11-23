@@ -143,7 +143,6 @@ class LendCabinet(APIView):
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(callback_base_url=setting.callback_base_url)
-    print ('=== request.data: ', request.data)
     body = {
     'sign': setting.sign,
     'body': {
@@ -173,11 +172,8 @@ class LendCabinetCallback(APIView):
     '''
     Callback API of lend cabinet
     '''
-    print('==== lend callback: ', request.data)
-    response_code = 405
-    if code in request.data:
-       code = int(request.data['code'])
-    
+    print('==== lend callback: request_data: ', request.data)
+    response_code = int(request.data['code'])
     if response_code == 200:
       # Implement Push notification
       push_notification_data = {
