@@ -142,7 +142,7 @@ class LendCabinet(APIView):
         )
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
-    lend_callback_url = '{callback_base_url}/rental/lend_cabinet_callback'.format(callback_base_url=setting.callback_base_url)
+    lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(callback_base_url=setting.callback_base_url)
     print ('=== request.data: ', request.data)
     body = {
     'sign': setting.sign,
