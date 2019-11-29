@@ -95,33 +95,34 @@ class GetAllCabinetInfo(APIView):
       )
     #################################################################
     # Wating for new version of rental server.
-    # url = '{base_url}/api/srv/cablist'.format(base_url=setting.url)
-    # body = {
-    #   'sign': setting.sign
-    # }
-    # headers = {
-    #   'Content-type': 'application/json'
-    # }
+    url = '{base_url}/api/srv/cablist'.format(base_url=setting.url)
+    body = {
+      'sign': setting.sign
+    }
+    headers = {
+      'Content-type': 'application/json'
+    }
 
-    # result = requests.post(url, headers=headers, json=body)
-    # response_data = result.json()
-    # response_code = int(response_data['code'])
-    # if not response_code == 200:
-    #   return Response(data=None, status=response_code)
+    result = requests.post(url, headers=headers, json=body)
+    response_data = result.json()
+    response_code = int(response_data['code'])
+    if not response_code == 200:
+      return Response(data=None, status=response_code)
     
-    # station_sn_list = {
-    #   'stationSnList': []
-    # }
-    # for statistation_snonSn in response_data:
-    #   station_sn_list['stationSnList'].append(station_sn)
+    body = response_data['code']
+    station_sn_list = {
+      'stationSnList': []
+    }
+    for station_sn in body:
+      station_sn_list['stationSnList'].append(station_sn)
 
     # return Response(data=station_sn_list, status=200)
     #################################################################
 
     # For test During wait new version
-    station_sn_list = {
-      'stationSnList': ['T1219071904']
-    }
+    # station_sn_list = {
+    #   'stationSnList': ['T1219071904']
+    # }
     return Response(data=station_sn_list, status=200)
 
 
