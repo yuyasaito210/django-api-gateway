@@ -99,18 +99,18 @@ class GetAllCabinetInfo(APIView):
     body = {
       'sign': setting.sign,
       'body': {
-          'condition': 'short/explicit',
-          'keyword':'*'
+        'condition': 'short/explicit',
+        'keyword':'*'
       }
     }
     headers = {
       'Content-type': 'application/json'
     }
-
+    print('==== sending request...')
     result = requests.post(url, headers=headers, json=body)
     print('==== response from middleware: ', result)
-    response_data = result.json()
-    response_code = int(response_data['code'])
+    # response_data = result.json()
+    # response_code = int(response_data['code'])
     
     # if not response_code == 200:
     #   return Response(data=None, status=response_code)
@@ -126,10 +126,10 @@ class GetAllCabinetInfo(APIView):
     #################################################################
 
     # For test During wait new version
-    # station_sn_list = {
-    #   'stationSnList': ['T1219071904']
-    # }
-    return Response(data=response_data, status=response_code)
+    station_sn_list = {
+      'stationSnList': ['T1219071904']
+    }
+    return Response(data=station_sn_list, status=200)
 
 
 class LendCabinet(APIView):
