@@ -93,8 +93,7 @@ class GetAllCabinetInfo(APIView):
         data={'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'},
         status=503
       )
-    #################################################################
-    # Wating for new version of rental server.
+
     url = '{base_url}/api/srv/cablist'.format(base_url=setting.url)
     body = {
       'sign': setting.sign,
@@ -116,20 +115,10 @@ class GetAllCabinetInfo(APIView):
     # if not response_code == 200:
     #   return Response(data=None, status=response_code)
     
-    # body = response_data['body']
     station_sn_list = {
       'stationSnList': response_data['body']
     }
-    # for station_sn in body:
-    #   station_sn_list['stationSnList'].append(station_sn)
 
-    return Response(data=station_sn_list, status=200)
-    #################################################################
-
-    # For test During wait new version
-    # station_sn_list = {
-    #   'stationSnList': ['T1219071904']
-    # }
     return Response(data=station_sn_list, status=200)
 
 
