@@ -109,7 +109,8 @@ class GetAllCabinetInfo(APIView):
     print('==== sending request...')
     result = requests.post(url, headers=headers, json=body)
     print('==== response from middleware: ', result)
-    # response_data = result.json()
+    response_data = result.json()
+    print('==== response json: ', response_data)
     # response_code = int(response_data['code'])
     
     # if not response_code == 200:
