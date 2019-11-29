@@ -99,7 +99,7 @@ class GetAllCabinetInfo(APIView):
     body = {
       'sign': setting.sign,
       'body': {
-        'condition': 'short/explicit',
+        'condition': 'short', # or explicit
         'keyword':'*'
       }
     }
@@ -117,19 +117,19 @@ class GetAllCabinetInfo(APIView):
     #   return Response(data=None, status=response_code)
     
     # body = response_data['body']
-    # station_sn_list = {
-    #   'stationSnList': []
-    # }
+    station_sn_list = {
+      'stationSnList': response_data['body']
+    }
     # for station_sn in body:
     #   station_sn_list['stationSnList'].append(station_sn)
 
-    # return Response(data=station_sn_list, status=200)
+    return Response(data=station_sn_list, status=200)
     #################################################################
 
     # For test During wait new version
-    station_sn_list = {
-      'stationSnList': ['T1219071904']
-    }
+    # station_sn_list = {
+    #   'stationSnList': ['T1219071904']
+    # }
     return Response(data=station_sn_list, status=200)
 
 
