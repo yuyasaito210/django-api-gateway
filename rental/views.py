@@ -194,7 +194,7 @@ class LendCabinet(APIView):
     )
     # for test
     response_data = {
-      'requestId': rentalRequest.id
+      'requestId': rentalRequest.fcm_device.id
     }
     # response_data['requestId'] = rentalRequest.id
     
