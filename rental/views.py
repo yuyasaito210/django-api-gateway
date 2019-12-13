@@ -170,7 +170,6 @@ class LendCabinet(APIView):
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
       callback_base_url=setting.callback_base_url
     )
-    print('==== trade_no: ', trade_no)
     # Send rental request.
     body = {
       'sign': setting.sign,
@@ -192,8 +191,9 @@ class LendCabinet(APIView):
       response_data = result.json()
       print('===== response_data: ', response_data)
       response_code = int(response_data['code'])
+      print('===== response_code: ', response_code)
       if response_code == 200:
-        response_data['requestId'] = rental_request.id
+        response_data['tradeNo'] = trade_no
       else:
         fcm_device.delete()
       
