@@ -32,17 +32,21 @@ class GetAllCabinetInfoResponseSerializer(serializers.Serializer):
 
 class LendCabinetRequestSerializer(serializers.Serializer):
     stationSn = serializers.CharField(required=True)
-    tradeNo = serializers.CharField(required=True)
-    slotNum = serializers.IntegerField(required=True)
+    uuid = serializers.CharField(required=True)
+    pushToken = serializers.CharField(required=True)
+    deviceType = serializers.CharField(required=True)
 
 class LendCabinetResponseSerializer(serializers.Serializer):
-    tradeNo = serializers.CharField(required=True)
-    powerBankSn = serializers.CharField(required=True)
-    slotNum = serializers.IntegerField(required=True)
+    msg = serializers.CharField(required=True)
+    code = serializers.IntegerField(required=True)
+    requestId = serializers.IntegerField()
 
 class LendCabinetCallbackRequestSerializer(serializers.Serializer):
     code = serializers.CharField(required=True)
     body = serializers.JSONField(required=True)
+    # tradeNo = serializers.CharField(required=True)
+    # powerBankSn = serializers.CharField(required=True)
+    # slotNum = serializers.IntegerField(required=True)
 
 class LendCabinetCallbackResponseSerializer(serializers.Serializer):
     msg = serializers.CharField(required=True)

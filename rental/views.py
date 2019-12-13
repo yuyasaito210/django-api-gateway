@@ -182,7 +182,7 @@ class LendCabinet(APIView):
         trade_no = trade_no,
         fcm_device_id = fcmDevice.id
       )
-      response_data['request_id'] = rentalRequest.id
+      response_data['requestId'] = rentalRequest.id
 
     return Response(data=response_data, status=response_code)
 
