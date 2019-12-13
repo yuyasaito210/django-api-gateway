@@ -175,8 +175,9 @@ class LendCabinet(APIView):
         )
     
     # print('===== result: ', result['data'])
-    # response_data = result.json()
-    # response_code = int(response_data['code'])
+    response_data = result.json()
+    print('===== response_data: ', response_data)
+    response_code = int(response_data['code'])
     # if response_code == 200:
     # Send GCM notification
     fcmDevice = FCMDevice.objects.create(
