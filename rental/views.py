@@ -222,8 +222,8 @@ class LendCabinetCallback(APIView):
       # Get data from request
       body = request.data['body']
       trade_no = body['tradeNo']
-      power_bank_sn = body['powerBankSn'],
-      slot_num = int(body['slotNum']),
+      power_bank_sn = body['powerBankSn']
+      slot_num = int(body['slotNum'])
       msg = body['msg']
       # Get rentalRequest and fcmDevice from tradeNo value
       rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
