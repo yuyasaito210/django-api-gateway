@@ -153,13 +153,13 @@ class LendCabinet(APIView):
     print('==== trade_no: ', trade_no)
     # Send rental request.
     body = {
-    'sign': setting.sign,
-    'body': {
-        'stationSn': station_sn,
-        'tradeNo': trade_no,
-        'url': lend_callback_url,
-        'timeout': 60
-      }
+      'sign': setting.sign,
+      'body': {
+          'stationSn': station_sn,
+          'tradeNo': trade_no,
+          'url': lend_callback_url,
+          'timeout': 60
+        }
     }
     headers = {
       'Content-type': 'application/json'
@@ -168,8 +168,11 @@ class LendCabinet(APIView):
     try:
       result = requests.post(url, headers=headers, json=body)
     except requests.RequestException as e:
-      print('==== error: ', dict(error=e.message))
-      return Response(data={}, status=403)
+      print('==== error: ', e.message)
+      raise Response(
+          data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
+          status=403
+        )
     
     # print('===== result: ', result['data'])
     response_data = result.json()
