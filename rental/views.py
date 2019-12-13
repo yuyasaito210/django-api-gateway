@@ -167,39 +167,37 @@ class LendCabinet(APIView):
     print('==== url: ', url)
     try:
       result = requests.post(url, headers=headers, json=body)
-    except requests.RequestException as e:
-      print('==== error: ', e.message)
+      # print('===== result: ', result['data'])
+      response_data = result.json()
+      print('===== response_data: ', response_data)
+      response_code = int(response_data['code'])
+      # if response_code == 200:
+      # Send GCM notification
+      fcmDevice = FCMDevice.objects.create(
+        registration_id=push_token,
+        active=True,
+        type=device_type
+      )
+      # Save current rental request to process callback from station.
+      rentalRequest = RentalRequest.objects.create(
+        station_sn = station_sn,
+        user_uuid = user_uuid,
+        device_type = device_type,
+        trade_no = trade_no,
+        fcm_device_id = fcmDevice.id
+      )
+      # for test
+      response_data = {
+        'requestId': rentalRequest.fcm_device.id
+      }
+      # response_data['requestId'] = rentalRequest.id
+      
+      return Response(data=response_data, status=200)
+    except:
       raise Response(
           data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
           status=403
         )
-    
-    # print('===== result: ', result['data'])
-    response_data = result.json()
-    print('===== response_data: ', response_data)
-    response_code = int(response_data['code'])
-    # if response_code == 200:
-    # Send GCM notification
-    fcmDevice = FCMDevice.objects.create(
-      registration_id=push_token,
-      active=True,
-      type=device_type
-    )
-    # Save current rental request to process callback from station.
-    rentalRequest = RentalRequest.objects.create(
-      station_sn = station_sn,
-      user_uuid = user_uuid,
-      device_type = device_type,
-      trade_no = trade_no,
-      fcm_device_id = fcmDevice.id
-    )
-    # for test
-    response_data = {
-      'requestId': rentalRequest.fcm_device.id
-    }
-    # response_data['requestId'] = rentalRequest.id
-    
-    return Response(data=response_data, status=200)
 
 
 class LendCabinetCallback(APIView):
