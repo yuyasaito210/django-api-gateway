@@ -137,7 +137,9 @@ class LendCabinet(APIView):
     setting = RentalServerSetting.objects.all().first()
     if setting is None:
       raise Response(
-          data={'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'},
+          data={
+            'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'
+          },
           status=503
         )
     station_sn = request.data['stationSn']
@@ -165,14 +167,9 @@ class LendCabinet(APIView):
       'Content-type': 'application/json'
     }
     print('==== url: ', url)
-    print('==== url: ', body)
+    print('==== body: ', body)
     try:
       result = requests.post(url, headers=headers, json=body)
-      return Response(
-          data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
-          status=403
-        )
-      # print('===== result: ', result['data'])
       response_data = result.json()
       print('===== response_data: ', response_data)
       response_code = int(response_data['code'])
