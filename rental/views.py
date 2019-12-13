@@ -144,7 +144,7 @@ class LendCabinet(APIView):
     user_uuid = request.data['uuid']
     push_token = request.data['pushToken']
     device_type = request.data['deviceType']
-    trade_no = 'nono-{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
+    trade_no = '{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
     
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
