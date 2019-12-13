@@ -175,26 +175,30 @@ class LendCabinet(APIView):
         )
     
     # print('===== result: ', result['data'])
-    response_data = result.json()
-    response_code = int(response_data['code'])
-    if response_code == 200:
-      # Send GCM notification
-      fcmDevice = FCMDevice.objects.create(
-        registration_id=push_token,
-        active=True,
-        type=device_type
-      )
-      # Save current rental request to process callback from station.
-      rentalRequest = RentalRequest.objects.create(
-        station_sn = station_sn,
-        user_uuid = user_uuid,
-        device_type = device_type,
-        trade_no = trade_no,
-        fcm_device_id = fcmDevice.id
-      )
-      response_data['requestId'] = rentalRequest.id
-      
-    return Response(data=response_data, status=response_code)
+    # response_data = result.json()
+    # response_code = int(response_data['code'])
+    # if response_code == 200:
+    # Send GCM notification
+    fcmDevice = FCMDevice.objects.create(
+      registration_id=push_token,
+      active=True,
+      type=device_type
+    )
+    # Save current rental request to process callback from station.
+    rentalRequest = RentalRequest.objects.create(
+      station_sn = station_sn,
+      user_uuid = user_uuid,
+      device_type = device_type,
+      trade_no = trade_no,
+      fcm_device_id = fcmDevice.id
+    )
+    # for test
+    response_data = {
+      'requestId': rentalRequest.id
+    }
+    # response_data['requestId'] = rentalRequest.id
+    
+  return Response(data=response_data, status=200)
 
 
 class LendCabinetCallback(APIView):
