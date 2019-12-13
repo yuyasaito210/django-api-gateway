@@ -239,10 +239,10 @@ class LendCabinetCallback(APIView):
         }
         res = fcm_device.send_message(data=fcm_data)
         print('====== res_message: ', res)
-        # fcm_device.delete()
         rental_request.power_bank_sn = power_bank_sn
         rental_request.slot_num = slot_num
         rental_request.save()
+        # fcm_device.delete()
       else:
         print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
 
