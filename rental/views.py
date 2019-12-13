@@ -168,7 +168,7 @@ class LendCabinet(APIView):
     try:
       result = requests.post(url, headers=headers, json=body)
     except requests.RequestException as e:
-      print('==== error: ', dict(error=e.message)
+      print('==== error: ', dict(error=e.message))
       return Response(data={}, status=403)
     
     # print('===== result: ', result['data'])
