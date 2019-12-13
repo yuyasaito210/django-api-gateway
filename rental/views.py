@@ -1,16 +1,19 @@
+import datetime
+import json
+import requests
 from django.shortcuts import render
 from django.http import HttpResponse
-from mailjet_rest import Client
-from .models import RentalServerSetting
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from fcm_django.models import FCMDevice
 from drf_yasg.utils import swagger_auto_schema
 from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer
-import requests
-import json
-
+from .push_notification_serializers import SendPushNotificationRequestionSerializer, SendPushNotificationResponseSerializer, SendFcmRequestionSerializer, SendFcmResponseSerializer
+from mailjet_rest import Client
+from .models import RentalServerSetting, RentalRequest
+from fcm_django.models import FCMDevice
 
 class GetRentalServer(APIView):
   @swagger_auto_schema(
@@ -137,15 +140,22 @@ class LendCabinet(APIView):
           data={'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'},
           status=503
         )
-
+    station_sn = request.data['stationSn']
+    user_uuid = request.data['uuid']
+    push_token = request.data['pushToken']
+    device_type = request.data['deviceType']
+    trade_no = 'nono-{datetime}'.format(datetime=datetime.datetime.now()) # Generate tradeNo uuid.
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
-    lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(callback_base_url=setting.callback_base_url)
+    lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
+      callback_base_url=setting.callback_base_url
+    )
+    # Send rental request.
     body = {
     'sign': setting.sign,
     'body': {
-        'stationSn': request.data['stationSn'],
-        'tradeNo': request.data['tradeNo'],
-        'slotNum': request.data['slotNum'],
+        'stationSn': station_sn,
+        'tradeNo': trade_no,
+        # 'slotNum': request.data['slotNum'],
         'url': lend_callback_url,
         'timeout': 60
       }
@@ -157,6 +167,23 @@ class LendCabinet(APIView):
     result = requests.post(url, headers=headers, json=body)
     response_data = result.json()
     response_code = int(response_data['code'])
+    if response_code == 200:
+      # Send GCM notification
+      fcmDevice = FCMDevice.objects.create(
+        registration_id=push_token,
+        active=True,
+        type=device_type
+      )
+      # Save current rental request to process callback from station.
+      rentalRequest = RentalRequest.objects.create(
+        station_sn = station_sn,
+        user_uuid = user_uuid,
+        device_type = device_type,
+        trade_no = trade_no,
+        fcm_device_id = fcmDevice.id
+      )
+      response_data['request_id'] = rentalRequest.id
+
     return Response(data=response_data, status=response_code)
 
 
@@ -172,22 +199,92 @@ class LendCabinetCallback(APIView):
     print('==== lend callback: request_data: ', request.data)
     response_code = int(request.data['code'])
     if response_code == 200:
-      # Implement Push notification
-      push_notification_data = {
-        'type': 'lend_result',
-        'data': {
-          'tradeNo': request.data['body']['tradeNo'],
-          'powerBankSn': request.data['body']['powerBankSn'],
-          'slotNum': request.data['body']['slotNum'],
-          'msg': request.data['body']['msg']
+      # Get data from request
+      body = request.data['body']
+      trade_no = body['tradeNo']
+      power_bank_sn = body['powerBankSn'],
+      slot_num = body['slotNum'],
+      msg = body['msg']
+      # Get rentalRequest and fcmDevice from tradeNo value
+      rentalRequest = RentalRequest.objects.filter(trade_no=trade_no).first()
+      if rentalRequest:
+        fcm_device = rentalRequest.fcm_device
+        # Implement FCM
+        fcm_data = {
+          'type': 'lend_result',
+          'data': {
+            'tradeNo': trade_no,
+            'powerBankSn': power_bank_sn,
+            'slotNum': slot_num,
+            'msg': msg
+          }
         }
-      }
-      # Send notificationd data to Firebase
-      # send_push_notification(push_notification_data)
-    
+        res = fcm_device.send_message(data=fcm_data)
+        print('====== res_message: ', res)
+        # fcm_device.delete()
+        rentalRequest.power_bank_sn = power_bank_sn
+        rentalRequest.slot_num = slot_num
+        rentalRequest.save()
+      else:
+        print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
+
     # Return 200 to rental service
     response_data = {
       'msg': '0',
       'code': '200'
     }
     return Response(data=response_data, status=response_code)
+
+class SendPushNotificatioin(APIView):
+  @swagger_auto_schema(
+    request_body=SendPushNotificationRequestionSerializer,
+    responses={200: SendPushNotificationResponseSerializer(many=False)}
+  )
+  def post(self, request, format=None):
+    '''
+    Send push notification to device
+    '''
+    print('==== push notification: request_data: ', request.data)
+    registrationId = request.data['registrationId']
+    deviceId = request.data['deviceId']
+    notification = request.data['notification']
+    # Send GCM notification
+    device = FCMDevice.objects.create(
+      registration_id=registrationId, 
+      # device_id=deviceId,
+      active=True,
+      type='ios'
+    )
+    res = device.send_message(
+      title=notification['title'],
+      body=notification['body'],
+      data=notification['data']
+    )
+    print('====== res_notification: ', res)
+    device.delete()
+    # Return 200 to rental service
+    return Response(data=res, status=200)
+
+class SendFcm(APIView):
+  @swagger_auto_schema(
+    request_body=SendFcmRequestionSerializer,
+    responses={200: SendFcmResponseSerializer(many=False)}
+  )
+  def post(self, request, format=None):
+    '''
+    Send a FCM (firebase cloud message) to device
+    '''
+    print('==== push notification: request_data: ', request.data)
+    registrationId = request.data['registrationId']
+    data_message = request.data['data']
+    # Send GCM notification
+    device = FCMDevice.objects.create(
+      registration_id=registrationId, 
+      active=True,
+      type='ios'
+    )
+    res = device.send_message(data=data_message)
+    print('====== res_message: ', res)
+    device.delete()
+    # Return 200 to rental service
+    return Response(data=res, status=200)

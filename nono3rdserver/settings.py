@@ -47,7 +47,8 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'rest_framework_swagger',
     'coreapi',
-    'drf_yasg'
+    'drf_yasg',
+    'fcm_django'
 ]
 
 LOCAL_APPS = [
@@ -139,3 +140,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 django_heroku.settings(locals())
+
+# Firebase push notification
+FCM_DJANGO_SETTINGS = {
+    "APP_VERBOSE_NAME": "Nono",
+        # default: _('FCM Django')
+    "FCM_SERVER_KEY": "AAAAqOVbqJk:APA91bHsDePEldN3eN7bvWYM3Lx7O31RI73iIPloV2dyQqFpysr-najupL7d_LhK3KR-F-1fnveg0O7FaD5WivLcgaSDzf4O7cJ925KTeNw5GZwg2Z7Agp4wiC0ZVfzcU2g3E-FWDTdD",
+        # true if you want to have only one active device per registered user at a time
+        # default: False
+    "ONE_DEVICE_PER_USER": False,
+        # devices to which notifications cannot be sent,
+        # are deleted upon receiving error response from FCM
+        # default: False
+    "DELETE_INACTIVE_DEVICES": False,
+}
