@@ -146,8 +146,25 @@ class LendCabinet(APIView):
     user_uuid = request.data['uuid']
     push_token = request.data['pushToken']
     device_type = request.data['deviceType']
-    trade_no = '{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
     
+    # Save current rental request to process callback from station.
+    fcm_device = FCMDevice.objects.create(
+      registration_id=push_token,
+      active=True,
+      type=device_type
+    )
+
+    # trade_no = '{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
+    trade_no = '{tradeNo}'.format(tradeNo=fcm_device.id)
+
+    rental_request = RentalRequest.objects.create(
+      station_sn = station_sn,
+      user_uuid = user_uuid,
+      device_type = device_type,
+      trade_no = trade_no,
+      fcm_device = fcm_device
+    )
+
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
       callback_base_url=setting.callback_base_url
@@ -173,33 +190,19 @@ class LendCabinet(APIView):
       response_data = result.json()
       print('===== response_data: ', response_data)
       response_code = int(response_data['code'])
-      # if response_code == 200:
-      # Send GCM notification
-      fcmDevice = FCMDevice.objects.create(
-        registration_id=push_token,
-        active=True,
-        type=device_type
-      )
-      # Save current rental request to process callback from station.
-      rentalRequest = RentalRequest.objects.create(
-        station_sn = station_sn,
-        user_uuid = user_uuid,
-        device_type = device_type,
-        trade_no = trade_no,
-        fcm_device_id = fcmDevice.id
-      )
-      # for test
-      response_data = {
-        'requestId': rentalRequest.fcm_device.id
-      }
-      # response_data['requestId'] = rentalRequest.id
+      if response_code == 200:
+        response_data['requestId'] = rental_request.id
+      else:
+        fcm_device.delete()
       
-      return Response(data=response_data, status=200)
+      return Response(data=response_data, status=response_code)
+
     except:
-      raise Response(
-          data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
-          status=403
-        )
+      fcm_device.delete()
+      return Response(
+        data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
+        status=403
+      )
 
 
 class LendCabinetCallback(APIView):
@@ -221,9 +224,9 @@ class LendCabinetCallback(APIView):
       slot_num = body['slotNum'],
       msg = body['msg']
       # Get rentalRequest and fcmDevice from tradeNo value
-      rentalRequest = RentalRequest.objects.filter(trade_no=trade_no).first()
-      if rentalRequest:
-        fcm_device = rentalRequest.fcm_device
+      rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
+      if rental_request:
+        fcm_device = rental_request.fcm_device
         # Implement FCM
         fcm_data = {
           'type': 'lend_result',
@@ -237,9 +240,9 @@ class LendCabinetCallback(APIView):
         res = fcm_device.send_message(data=fcm_data)
         print('====== res_message: ', res)
         # fcm_device.delete()
-        rentalRequest.power_bank_sn = power_bank_sn
-        rentalRequest.slot_num = slot_num
-        rentalRequest.save()
+        rental_request.power_bank_sn = power_bank_sn
+        rental_request.slot_num = slot_num
+        rental_request.save()
       else:
         print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
 
