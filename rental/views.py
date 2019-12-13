@@ -198,7 +198,7 @@ class LendCabinet(APIView):
     }
     # response_data['requestId'] = rentalRequest.id
     
-  return Response(data=response_data, status=200)
+    return Response(data=response_data, status=200)
 
 
 class LendCabinetCallback(APIView):
