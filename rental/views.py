@@ -1,6 +1,6 @@
-import datetime
 import json
 import requests
+import time
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework import status
@@ -144,18 +144,19 @@ class LendCabinet(APIView):
     user_uuid = request.data['uuid']
     push_token = request.data['pushToken']
     device_type = request.data['deviceType']
-    trade_no = 'nono-{datetime}'.format(datetime=datetime.datetime.now()) # Generate tradeNo uuid.
+    trade_no = 'nono-{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
+    
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
       callback_base_url=setting.callback_base_url
     )
+    print('==== trade_no: ', trade_no)
     # Send rental request.
     body = {
     'sign': setting.sign,
     'body': {
         'stationSn': station_sn,
         'tradeNo': trade_no,
-        # 'slotNum': request.data['slotNum'],
         'url': lend_callback_url,
         'timeout': 60
       }
@@ -163,8 +164,9 @@ class LendCabinet(APIView):
     headers = {
       'Content-type': 'application/json'
     }
-
+    print('==== url: ', url)
     result = requests.post(url, headers=headers, json=body)
+    # print('===== result: ', result['data'])
     response_data = result.json()
     response_code = int(response_data['code'])
     if response_code == 200:
@@ -183,7 +185,7 @@ class LendCabinet(APIView):
         fcm_device_id = fcmDevice.id
       )
       response_data['requestId'] = rentalRequest.id
-
+      
     return Response(data=response_data, status=response_code)
 
 
