@@ -165,6 +165,7 @@ class LendCabinet(APIView):
       'Content-type': 'application/json'
     }
     print('==== url: ', url)
+    print('==== url: ', body)
     try:
       result = requests.post(url, headers=headers, json=body)
       return Response(
