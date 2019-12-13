@@ -167,7 +167,10 @@ class LendCabinet(APIView):
     print('==== url: ', url)
     try:
       result = requests.post(url, headers=headers, json=body)
-      return result
+      return Response(
+          data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
+          status=403
+        )
       # print('===== result: ', result['data'])
       response_data = result.json()
       print('===== response_data: ', response_data)
