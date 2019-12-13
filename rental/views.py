@@ -162,6 +162,7 @@ class LendCabinet(APIView):
       user_uuid = user_uuid,
       device_type = device_type,
       trade_no = trade_no,
+      slot_num = 0,
       fcm_device = fcm_device
     )
 
@@ -176,6 +177,7 @@ class LendCabinet(APIView):
       'body': {
           'stationSn': station_sn,
           'tradeNo': trade_no,
+          'slotNum': 0,
           'url': lend_callback_url,
           'timeout': 60
         }
