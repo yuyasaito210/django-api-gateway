@@ -162,7 +162,7 @@ class LendCabinet(APIView):
       user_uuid = user_uuid,
       device_type = device_type,
       trade_no = trade_no,
-      slot_num = 0,
+      slot_id = 0,
       fcm_device = fcm_device
     )
 
