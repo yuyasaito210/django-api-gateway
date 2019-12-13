@@ -223,7 +223,7 @@ class LendCabinetCallback(APIView):
       body = request.data['body']
       trade_no = body['tradeNo']
       power_bank_sn = body['powerBankSn'],
-      slot_num = body['slotNum'],
+      slot_num = int(body['slotNum']),
       msg = body['msg']
       # Get rentalRequest and fcmDevice from tradeNo value
       rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
@@ -239,6 +239,7 @@ class LendCabinetCallback(APIView):
             'msg': msg
           }
         }
+        print('====== fcm_data: ', fcm_data)
         res = fcm_device.send_message(data=fcm_data)
         print('====== res_message: ', res)
         rental_request.power_bank_sn = power_bank_sn
