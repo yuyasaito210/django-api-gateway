@@ -167,6 +167,7 @@ class LendCabinet(APIView):
     print('==== url: ', url)
     try:
       result = requests.post(url, headers=headers, json=body)
+      return result
       # print('===== result: ', result['data'])
       response_data = result.json()
       print('===== response_data: ', response_data)
