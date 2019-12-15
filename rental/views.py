@@ -256,6 +256,7 @@ class LendCabinetCallback(APIView):
     }
     return Response(data=response_data, status=response_code)
 
+
 class SendPushNotificatioin(APIView):
   @swagger_auto_schema(
     request_body=SendPushNotificationRequestionSerializer,
@@ -285,6 +286,7 @@ class SendPushNotificatioin(APIView):
     device.delete()
     # Return 200 to rental service
     return Response(data=res, status=200)
+
 
 class SendFcm(APIView):
   @swagger_auto_schema(
