@@ -155,17 +155,15 @@ class StripeSaveCard(APIView):
 
           # Only confirm an order after you have status: succeeded
           print('______STATUS_____', customer)  # should be succeeded
-          if customer['status'] == 'succeeded':
-              return HttpResponse(json.dumps(
-                  {
-                    'status': 200,
-                    'message': 'Your card has registered successfully.',
-                    'datat': customer
-                  }
-                )
-              )
-          else:
-              raise stripe.error.CardError
+          
+          return HttpResponse(json.dumps(
+              {
+                'status': 200,
+                'message': 'Your card has registered successfully.',
+                'datat': customer
+              }
+            )
+          )
         except stripe.error.CardError as e:
             body = e.json_body
             err = body.get('error', {})
