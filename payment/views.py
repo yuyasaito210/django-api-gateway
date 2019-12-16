@@ -155,7 +155,7 @@ class StripeSaveCard(APIView):
 
           # Only confirm an order after you have status: succeeded
           print('______STATUS_____', customer)  # should be succeeded
-          if charge['status'] == 'succeeded':
+          if customer['status'] == 'succeeded':
               return HttpResponse(json.dumps(
                   {
                     'status': 200,
