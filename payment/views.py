@@ -160,7 +160,7 @@ class StripeSaveCard(APIView):
               {
                 'status': 200,
                 'message': 'Your card has registered successfully.',
-                'datat': customer
+                'data': customer
               }
             )
           )
