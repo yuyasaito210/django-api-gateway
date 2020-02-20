@@ -5,11 +5,11 @@ class SendPushNotificationDataSerializer(serializers.Serializer):
   title = serializers.CharField(required=True)
   body = serializers.CharField(required=True)
   data = serializers.JSONField()
-  onesignal_user_id = serializers.CharField(required=True)
 
 class SendPushNotificationRequestionSerializer(serializers.Serializer):
     registrationId = serializers.CharField(required=True)
     deviceId = serializers.CharField()
+    onesignal_user_id = serializers.CharField(required=True)
     notification = SendPushNotificationDataSerializer()
 
 class SendPushNotificationResponseSerializer(serializers.Serializer):

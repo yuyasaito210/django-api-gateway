@@ -300,6 +300,7 @@ class SendPushNotificatioin(APIView):
     print('==== push notification: request_data: ', request.data)
     registrationId = request.data['registrationId']
     deviceId = request.data['deviceId']
+    onesignal_user_id = request.data['onesignal_user_id']
     notification = request.data['notification']
 
     # Send GCM notification
@@ -329,7 +330,7 @@ class SendPushNotificatioin(APIView):
           'headings': {'en': notification['title']},
           'contents': {'en': notification['body']},
           'data': notification['data'],
-          'include_player_ids': [notification['onesignal_user_id']],
+          'include_player_ids': [onesignal_user_id,],
         }
       )
 
