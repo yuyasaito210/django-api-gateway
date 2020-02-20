@@ -144,6 +144,7 @@ class LendCabinet(APIView):
           },
           status=503
         )
+    print('==== request.data: ', request.data)
     station_sn = request.data['stationSn']
     user_uuid = request.data['uuid']
     push_token = request.data['pushToken']
