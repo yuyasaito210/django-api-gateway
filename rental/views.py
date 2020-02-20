@@ -319,7 +319,7 @@ class ReturnPowerBank(APIView):
     uuid = request.data['uuid']
     onesignal_user_id = request.data['onesignalUserId']
     
-    rental_request = RentalRequest.objects.filter(trad_no=trade_no).first()
+    rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
     
     url = '{base_url}/api/dev/pbyet'.format(base_url=setting.url)
     return_powerbank_callback_url = '{callback_base_url}/rental/return_powerbank_callback'.format(
