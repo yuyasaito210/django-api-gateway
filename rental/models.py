@@ -44,6 +44,16 @@ class OneSignalSetting(models.Model):
 
 
 class RentalRequest(models.Model):
+    REQUIRED_RENT = 'REQUIRED_RENT'
+    RENTED = 'RENTED'
+    REQUIRED_RETURN = 'RENTED'
+    RETURNED = 'REQUIRED_RETURN'
+    STATUS_CHOICES = [
+        (REQUIRED_RENT, 'Required to rent a buttery'),
+        (RENTED, 'Rented a buttery'),
+        (REQUIRED_RETURN, 'Required to return the buttery'),
+        (RETURNED, 'Returned the buttery')
+    ]
     station_sn = models.CharField(max_length=32, blank=False, default='')
     user_uuid = models.CharField(max_length=128, blank=False, default='')
     device_type = models.CharField(max_length=10, blank=False, default='ios')
@@ -56,6 +66,11 @@ class RentalRequest(models.Model):
         primary_key=True,
     )
     onesignal_user_id = models.CharField(max_length=255, blank=False, default='')
+    status = models.CharField(
+        max_length=60,
+        choices=STATUS_CHOICES,
+        default=REQUIRED_RENT
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

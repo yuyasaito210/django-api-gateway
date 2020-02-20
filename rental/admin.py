@@ -19,7 +19,7 @@ class OneSignalSettingAdmin(admin.ModelAdmin):
         'id', 'app_name', 'app_id', 'app_auth_key', 'user_auth_key', 'updated_at', 'created_at'
     )
     list_display_links = (
-        'id', 'app_name', 'app_auth_key', 'user_auth_key', 'updated_at', 'created_at'
+        'id', 'app_name', 'app_id', 'app_auth_key', 'user_auth_key', 'updated_at', 'created_at'
     )
     list_filter = ('app_name', 'app_auth_key', 'user_auth_key')
     list_per_page = 25
@@ -28,12 +28,14 @@ class OneSignalSettingAdmin(admin.ModelAdmin):
 @admin.register(RentalRequest)
 class RentalRequestAdmin(admin.ModelAdmin):
     list_display = (
-        'trade_no', 'station_sn', 'user_uuid', 'device_type', 'slot_id', 'power_bank_sn',
+        'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
+        'user_uuid', 'device_type',
         'created_at','updated_at'
     )
     list_display_links = (
-        'trade_no', 'station_sn', 'user_uuid', 'device_type', 'slot_id', 'power_bank_sn',
+        'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
+        'user_uuid', 'device_type',
         'created_at','updated_at'
     )
-    list_filter = ('trade_no', 'station_sn', 'user_uuid', 'device_type')
+    list_filter = ('trade_no', 'station_sn', 'status', 'user_uuid', 'device_type')
     list_per_page = 50

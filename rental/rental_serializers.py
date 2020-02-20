@@ -35,6 +35,7 @@ class LendCabinetRequestSerializer(serializers.Serializer):
     uuid = serializers.CharField(required=True)
     pushToken = serializers.CharField(required=True)
     deviceType = serializers.CharField(required=True)
+    onesignalUserId = serializers.CharField(required=True)
 
 class LendCabinetResponseSerializer(serializers.Serializer):
     msg = serializers.CharField(required=True)
@@ -49,5 +50,32 @@ class LendCabinetCallbackRequestSerializer(serializers.Serializer):
     # slotNum = serializers.IntegerField(required=True)
 
 class LendCabinetCallbackResponseSerializer(serializers.Serializer):
+    msg = serializers.CharField(required=True)
+    code = serializers.IntegerField(required=True)
+
+
+class ReturnPowerBankRequestSerializer(serializers.Serializer):
+    stationSn = serializers.CharField(required=True)
+    tradeNo = serializers.CharField(required=True)
+    soltNum = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)
+    onesignalUserId = serializers.CharField(required=True)
+
+class ReturnPowerBankResponseSerializer(serializers.Serializer):
+    msg = serializers.CharField(required=True)
+    code = serializers.CharField(required=True)
+
+class ReturnPowerBankCallbackRequestSerializer(serializers.Serializer):
+    msg = serializers.IntegerField(required=True)
+    powerBankSn = serializers.CharField(required=True)
+    soltNum = serializers.CharField(required=True)
+    code = serializers.IntegerField(required=True)
+    rsCode = serializers.IntegerField(required=True)
+    stationNo = serializers.CharField(required=True)
+    linestatus = serializers.CharField(required=True)
+    lockstatus = serializers.CharField(required=True)
+    ele = serializers.CharField(required=True)
+
+class ReturnPowerBankCallbackResponseSerializer(serializers.Serializer):
     msg = serializers.CharField(required=True)
     code = serializers.IntegerField(required=True)

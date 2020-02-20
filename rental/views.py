@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from fcm_django.models import FCMDevice
 from drf_yasg.utils import swagger_auto_schema
 import onesignal as onesignal_sdk
-from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer
+from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer, ReturnPowerBankRequestSerializer, ReturnPowerBankResponseSerializer, ReturnPowerBankCallbackRequestSerializer,ReturnPowerBankCallbackResponseSerializer
 from .push_notification_serializers import SendPushNotificationRequestionSerializer, SendPushNotificationResponseSerializer, SendFcmRequestionSerializer, SendFcmResponseSerializer
 from mailjet_rest import Client
 from .models import RentalServerSetting, RentalRequest, OneSignalSetting
@@ -167,7 +167,8 @@ class LendCabinet(APIView):
       trade_no = trade_no,
       slot_id = 0,
       fcm_device = fcm_device,
-      onesignal_user_id = onesignal_user_id
+      onesignal_user_id = onesignal_user_id,
+      status = RentalRequest.REQUIRED_RENT
     )
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
@@ -232,20 +233,20 @@ class LendCabinetCallback(APIView):
       # Get rentalRequest and fcmDevice from tradeNo value
       rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
       if rental_request:
-        fcm_device = rental_request.fcm_device
-        # Implement FCM
-        fcm_data = {
-          'type': 'lend_result',
-          'data': {
-            'tradeNo': trade_no,
-            'powerBankSn': power_bank_sn,
-            'slotNum': slot_num,
-            'msg': msg
-          }
-        }
-        print('====== fcm_data: ', fcm_data)
-        res = fcm_device.send_message(data=fcm_data)
-        print('====== res_message: ', res)
+        # fcm_device = rental_request.fcm_device
+        # # Implement FCM
+        # fcm_data = {
+        #   'type': 'lend_result',
+        #   'data': {
+        #     'tradeNo': trade_no,
+        #     'powerBankSn': power_bank_sn,
+        #     'slotNum': slot_num,
+        #     'msg': msg
+        #   }
+        # }
+        # print('====== fcm_data: ', fcm_data)
+        # res = fcm_device.send_message(data=fcm_data)
+        # print('====== res_message: ', res)
         # Implement OneSignal
         onsignalSetting = OneSignalSetting.objects.all().first()
         if onsignalSetting:
@@ -256,7 +257,11 @@ class LendCabinetCallback(APIView):
           new_notification = onesignal_sdk.Notification(
             post_body={
               'headings': {'en': 'Rent Buttery'},
-              'contents': {'en': 'You rented a buttery succesfully.'},
+              'contents': {
+                'en': 'You rented a buttery succesfully.' + 
+                       ' PowerBank: ' + power_bank_sn + ', ' +
+                       ' SlotNumber: ' + slot_num + '.'
+              },
               'data': {
                 'type': 'RENT_BATTERY',
                 'data': {
@@ -275,8 +280,140 @@ class LendCabinetCallback(APIView):
           
         rental_request.power_bank_sn = power_bank_sn
         rental_request.slot_num = slot_num
+        rental_request.status = RentalRequest.RENTED
         rental_request.save()
         # fcm_device.delete()
+      else:
+        print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
+
+    # Return 200 to rental service
+    response_data = {
+      'msg': '0',
+      'code': '200'
+    }
+    return Response(data=response_data, status=response_code)
+
+
+class ReturnPowerBank(APIView):
+  @swagger_auto_schema(
+    request_body=ReturnPowerBankRequestSerializer,
+    responses={200: ReturnPowerBankResponseSerializer(many=False)}
+  )
+  def post(self, request, format=None):
+    '''
+    Lend cabinet
+    '''
+    setting = RentalServerSetting.objects.all().first()
+    if setting is None:
+      raise Response(
+          data={
+            'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'
+          },
+          status=503
+        )
+    station_sn = request.data['stationSn']
+    trade_no = request.data['tradeNo']
+    push_token = request.data['pushToken']
+    slot_num = request.data['soltNum']
+    uuid = request.data['uuid']
+    onesignal_user_id = request.data['onesignalUserId']
+    
+    rental_request = RentalRequest.objects.filter(trad_no=trade_no).first()
+    
+    url = '{base_url}/api/dev/pbyet'.format(base_url=setting.url)
+    return_powerbank_callback_url = '{callback_base_url}/rental/return_powerbank_callback'.format(
+      callback_base_url=setting.callback_base_url
+    )
+    # Send rental request.
+    body = {
+      'sign': setting.sign,
+      'body': {
+          'stationSn': station_sn,
+          'tradeNo': trade_no,
+          'slotNum': slot_num,
+          'url': return_powerbank_callback_url
+        }
+    }
+    headers = {
+      'Content-type': 'application/json'
+    }
+    print('==== url: ', url)
+    print('==== body: ', body)
+    try:
+      result = requests.post(url, headers=headers, json=body)
+      response_data = result.json()
+      print('===== response_data: ', response_data)
+      response_code = int(response_data['code'])
+      print('===== response_code: ', response_code)
+      if response_code == 200:
+        response_data['tradeNo'] = trade_no
+      
+      rental_request.status = RentalRequest.REQUIRED_RETURN
+      rental_request.save()
+      return Response(data=response_data, tatus=response_code)
+
+    except:
+      return Response(
+        data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
+        status=403
+      )
+
+class ReturnPowerBankCallBack(APIView):
+  @swagger_auto_schema(
+    request_body=ReturnPowerBankCallbackRequestSerializer,
+    responses={200: ReturnPowerBankCallbackResponseSerializer(many=False)}
+  )
+  def post(self, request, format=None):
+    '''
+    Callback API of lend cabinet
+    '''
+    print('==== lend callback: request_data: ', request.data)
+    response_code = int(request.data['code'])
+    if response_code == 200:
+      # Get data from request
+      body = request.data['body']
+      power_bank_sn = body['powerBankSn']
+      slot_num = int(body['slotNum'])
+      trade_no = body['tradeNo']
+      code = body['code']
+      rs_code = body['rsCode']
+      station_no = body['stationNo']
+      linestatus = body['linestatus']
+      lockstatus = body['lockstatus']
+      ele = body['ele']
+      msg = body['msg']
+
+      # Get returnRequest and fcmDevice from tradeNo value
+      rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
+      if rental_request:
+        # Implement OneSignal
+        onsignalSetting = OneSignalSetting.objects.all().first()
+        if onsignalSetting:
+          onesignal_client = onesignal_sdk.Client(
+            app_auth_key=onsignalSetting.app_auth_key,
+            app_id=onsignalSetting.app_id
+          )
+          new_notification = onesignal_sdk.Notification(
+            post_body={
+              'headings': {'en': 'Return Buttery'},
+              'contents': {
+                'en': 'You returned the buttery succesfully.' + 
+                    ' PowerBank: ' + power_bank_sn + ', ' +
+                    ' SlotNumber: ' + slot_num + '.'
+              },
+              'data': {
+                'type': 'RETURN_BATTERY',
+                'data': body
+              },
+              'include_player_ids': [rental_request.onesignal_user_id],
+            }
+          )
+
+          # send notification, it will return a response
+          onesignal_response = onesignal_client.send_notification(new_notification)
+
+        rental_request.status = RentalRequest.RETURNED
+        rental_request.save()
       else:
         print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
 
@@ -298,25 +435,25 @@ class SendPushNotificatioin(APIView):
     Send push notification to device
     '''
     print('==== push notification: request_data: ', request.data)
-    registrationId = request.data['registrationId']
-    deviceId = request.data['deviceId']
+    # registrationId = request.data['registrationId']
+    # deviceId = request.data['deviceId']
     onesignal_user_id = request.data['onesignal_user_id']
     notification = request.data['notification']
 
     # Send GCM notification
-    device = FCMDevice.objects.create(
-      registration_id=registrationId, 
-      # device_id=deviceId,
-      active=True,
-      type='ios'
-    )
-    res = device.send_message(
-      title=notification['title'],
-      body=notification['body'],
-      data=notification['data']
-    )
-    print('====== res_notification: ', res)
-    device.delete()
+    # device = FCMDevice.objects.create(
+    #   registration_id=registrationId, 
+    #   # device_id=deviceId,
+    #   active=True,
+    #   type='ios'
+    # )
+    # res = device.send_message(
+    #   title=notification['title'],
+    #   body=notification['body'],
+    #   data=notification['data']
+    # )
+    # print('====== res_notification: ', res)
+    # device.delete()
 
     # Send Onsignal Push notification
     onsignalSetting = OneSignalSetting.objects.all().first()
