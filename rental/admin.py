@@ -16,12 +16,12 @@ class RentalServerSettingAdmin(admin.ModelAdmin):
 @admin.register(OneSignalSetting)
 class OneSignalSettingAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'app_name', 'user_auth_key', 'app_auth_key', 'updated_at', 'created_at'
+        'id', 'app_name', 'app_id', 'app_auth_key', 'user_auth_key', 'updated_at', 'created_at'
     )
     list_display_links = (
-        'id', 'app_name', 'user_auth_key', 'app_auth_key', 'updated_at', 'created_at'
+        'id', 'app_name', 'app_auth_key', 'user_auth_key', 'updated_at', 'created_at'
     )
-    list_filter = ('app_name', 'user_auth_key', 'app_auth_key')
+    list_filter = ('app_name', 'app_auth_key', 'user_auth_key')
     list_per_page = 25
 
 

@@ -26,8 +26,9 @@ class RentalServerSetting(models.Model):
 
 class OneSignalSetting(models.Model):
     app_name = models.CharField(max_length=50, blank=False, default='')
-    user_auth_key = models.CharField(max_length=256, blank=False, default='')
+    app_id = models.CharField(max_length=256, blank=False, default='')
     app_auth_key = models.CharField(max_length=256, blank=False, default='')
+    user_auth_key = models.CharField(max_length=256, blank=False, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,7 +37,7 @@ class OneSignalSetting(models.Model):
 
     class Meta:
         ordering = ('app_name', 'updated_at')
-        unique_together = ('user_auth_key', 'app_auth_key')
+        unique_together = ('app_id', 'app_auth_key', 'user_auth_key')
         verbose_name = _("OneSignalSetting")
         verbose_name_plural = _("OneSignalSetting")
         managed = True
