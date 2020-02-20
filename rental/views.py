@@ -9,11 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from fcm_django.models import FCMDevice
 from drf_yasg.utils import swagger_auto_schema
+import onesignal as onesignal_sdk
 from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer
 from .push_notification_serializers import SendPushNotificationRequestionSerializer, SendPushNotificationResponseSerializer, SendFcmRequestionSerializer, SendFcmResponseSerializer
 from mailjet_rest import Client
-from .models import RentalServerSetting, RentalRequest
+from .models import RentalServerSetting, RentalRequest, OneSignalSetting
 from fcm_django.models import FCMDevice
+
 
 class GetRentalServer(APIView):
   @swagger_auto_schema(
@@ -146,6 +148,7 @@ class LendCabinet(APIView):
     user_uuid = request.data['uuid']
     push_token = request.data['pushToken']
     device_type = request.data['deviceType']
+    onesignal_user_id = request.data['onesignalUserId']
     
     # Save current rental request to process callback from station.
     fcm_device = FCMDevice.objects.create(
@@ -163,7 +166,8 @@ class LendCabinet(APIView):
       device_type = device_type,
       trade_no = trade_no,
       slot_id = 0,
-      fcm_device = fcm_device
+      fcm_device = fcm_device,
+      onesignal_user_id = onesignal_user_id
     )
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
@@ -242,6 +246,33 @@ class LendCabinetCallback(APIView):
         print('====== fcm_data: ', fcm_data)
         res = fcm_device.send_message(data=fcm_data)
         print('====== res_message: ', res)
+        # Implement OneSignal
+        onsignalSetting = OneSignalSetting.objects.all().first()
+        if onsignalSetting:
+          onesignal_client = onesignal_sdk.Client(
+            app_auth_key=onsignalSetting.app_auth_key,
+            app_id=onsignalSetting.app_id
+          )
+          new_notification = onesignal_sdk.Notification(
+            post_body={
+              'headings': {'en': 'Rent Buttery'},
+              'contents': {'en': 'You rented a buttery succesfully.'},
+              'data': {
+                'type': 'RENT_BATTERY',
+                'data': {
+                  'tradeNo': trade_no,
+                  'powerBankSn': power_bank_sn,
+                  'slotNum': slot_num,
+                  'msg': msg
+                }
+              },
+              'include_player_ids': [rental_request.onesignal_user_id],
+            }
+          )
+
+          # send notification, it will return a response
+          onesignal_response = onesignal_client.send_notification(new_notification)
+          
         rental_request.power_bank_sn = power_bank_sn
         rental_request.slot_num = slot_num
         rental_request.save()
@@ -270,6 +301,7 @@ class SendPushNotificatioin(APIView):
     registrationId = request.data['registrationId']
     deviceId = request.data['deviceId']
     notification = request.data['notification']
+
     # Send GCM notification
     device = FCMDevice.objects.create(
       registration_id=registrationId, 
@@ -284,8 +316,30 @@ class SendPushNotificatioin(APIView):
     )
     print('====== res_notification: ', res)
     device.delete()
+
+    # Send Onsignal Push notification
+    onsignalSetting = OneSignalSetting.objects.all().first()
+    if onsignalSetting:
+      onesignal_client = onesignal_sdk.Client(
+        app_auth_key=onsignalSetting.app_auth_key,
+        app_id=onsignalSetting.app_id
+      )
+      new_notification = onesignal_sdk.Notification(
+        post_body={
+          'headings': {'en': notification['title']},
+          'contents': {'en': notification['body']},
+          'data': notification['data'],
+          'include_player_ids': [notification['onesignal_user_id']],
+        }
+      )
+
+      # send notification, it will return a response
+      onesignal_response = onesignal_client.send_notification(new_notification)
+      print('====== onesignal_response.status_code: ', onesignal_response.status_code)
+      print('====== onesignal_response.json: ', onesignal_response.json())
+    
     # Return 200 to rental service
-    return Response(data=res, status=200)
+    return Response(data=onesignal_response, status=200)
 
 
 class SendFcm(APIView):

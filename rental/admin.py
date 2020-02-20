@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import RentalServerSetting, RentalRequest
+from .models import RentalServerSetting, RentalRequest, OneSignalSetting
 
 @admin.register(RentalServerSetting)
 class RentalServerSettingAdmin(admin.ModelAdmin):
@@ -11,6 +11,19 @@ class RentalServerSettingAdmin(admin.ModelAdmin):
     )
     list_filter = ('url', 'name', 'sign')
     list_per_page = 25
+
+
+@admin.register(OneSignalSetting)
+class OneSignalSettingAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'app_name', 'user_auth_key', 'app_auth_key', 'updated_at', 'created_at'
+    )
+    list_display_links = (
+        'id', 'app_name', 'user_auth_key', 'app_auth_key', 'updated_at', 'created_at'
+    )
+    list_filter = ('app_name', 'user_auth_key', 'app_auth_key')
+    list_per_page = 25
+
 
 @admin.register(RentalRequest)
 class RentalRequestAdmin(admin.ModelAdmin):

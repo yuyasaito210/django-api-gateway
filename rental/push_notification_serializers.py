@@ -4,7 +4,8 @@ from drf_yasg.utils import swagger_serializer_method
 class SendPushNotificationDataSerializer(serializers.Serializer):
   title = serializers.CharField(required=True)
   body = serializers.CharField(required=True)
-  data = data = serializers.JSONField()
+  data = serializers.JSONField()
+  onesignal_user_id = serializers.CharField(required=True)
 
 class SendPushNotificationRequestionSerializer(serializers.Serializer):
     registrationId = serializers.CharField(required=True)

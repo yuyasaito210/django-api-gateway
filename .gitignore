@@ -2,6 +2,7 @@ venv
 *.pyc
 staticfiles
 .env
+.env3
 db.sqlite3
 .idea/
 .DS_Store
