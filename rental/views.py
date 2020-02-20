@@ -251,7 +251,7 @@ class LendCabinetCallback(APIView):
         if onsignalSetting:
           onesignal_client = onesignal_sdk.Client(
             app_auth_key=onsignalSetting.app_auth_key,
-            app_id=onsignalSetting.app_id
+            app_id=onsignalSetting.app_name
           )
           new_notification = onesignal_sdk.Notification(
             post_body={
@@ -323,7 +323,7 @@ class SendPushNotificatioin(APIView):
     if onsignalSetting:
       onesignal_client = onesignal_sdk.Client(
         app_auth_key=onsignalSetting.app_auth_key,
-        app_id=onsignalSetting.app_id
+        app_id=onsignalSetting.app_name
       )
       new_notification = onesignal_sdk.Notification(
         post_body={
