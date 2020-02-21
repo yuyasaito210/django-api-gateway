@@ -57,7 +57,7 @@ class LendCabinetCallbackResponseSerializer(serializers.Serializer):
 class ReturnPowerBankRequestSerializer(serializers.Serializer):
     stationSn = serializers.CharField(required=True)
     tradeNo = serializers.CharField(required=True)
-    soltNum = serializers.CharField(required=True)
+    slotNum = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)
     onesignalUserId = serializers.CharField(required=True)
 
@@ -68,7 +68,7 @@ class ReturnPowerBankResponseSerializer(serializers.Serializer):
 class ReturnPowerBankCallbackRequestSerializer(serializers.Serializer):
     msg = serializers.IntegerField(required=True)
     powerBankSn = serializers.CharField(required=True)
-    soltNum = serializers.CharField(required=True)
+    slotNum = serializers.CharField(required=True)
     code = serializers.IntegerField(required=True)
     rsCode = serializers.IntegerField(required=True)
     stationNo = serializers.CharField(required=True)

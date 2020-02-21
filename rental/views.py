@@ -312,10 +312,11 @@ class ReturnPowerBank(APIView):
           },
           status=503
         )
+    print('====== ReturnPowerBank: request.data: ', request.data)
     station_sn = request.data['stationSn']
     trade_no = request.data['tradeNo']
     push_token = request.data['pushToken']
-    slot_num = request.data['soltNum']
+    slot_num = request.data['slot_num']
     uuid = request.data['uuid']
     onesignal_user_id = request.data['onesignalUserId']
     
@@ -398,7 +399,7 @@ class ReturnPowerBankCallBack(APIView):
             post_body={
               'headings': {'en': 'Return Buttery'},
               'contents': {
-                'en': 'You returned the buttery succesfully.. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
+                'en': 'You returned the buttery succesfully. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
                   power_bank_sn=power_bank_sn, slot_num=slot_num
                 )
               },
