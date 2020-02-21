@@ -162,6 +162,7 @@ class LendCabinet(APIView):
     )
     print('===== rental_request.id: ', rental_request.id)
     trade_no = '{tradeNo}'.format(tradeNo=rental_request.id)
+    rental_request.trade_no = trade_no
     rental_request.save()
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
