@@ -78,7 +78,7 @@ class RentalRequest(models.Model):
         return u"%s" % self.id
 
     class Meta:
-        ordering = ('-trade_no', '-updated_at')
+        ordering = ('-updated_at',)
         unique_together = ('trade_no', 'station_sn')
         verbose_name = _("RentalRequest")
         verbose_name_plural = _("RentalRequest")
