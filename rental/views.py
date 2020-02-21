@@ -259,9 +259,9 @@ class LendCabinetCallback(APIView):
             post_body={
               'headings': {'en': 'Rent Buttery'},
               'contents': {
-                'en': 'You rented a buttery succesfully.' + 
-                       ' PowerBank: ' + power_bank_sn + ', ' +
-                       ' SlotNumber: ' + slot_num + '.'
+                'en': 'You rented a buttery succesfully. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
+                  power_bank_sn=power_bank_sn, slot_num=slot_num
+                )
               },
               'data': {
                 'type': 'RENT_BATTERY',
@@ -351,7 +351,7 @@ class ReturnPowerBank(APIView):
       
       rental_request.status = RentalRequest.REQUIRED_RETURN
       rental_request.save()
-      return Response(data=response_data, tatus=response_code)
+      return Response(data=response_data, status=response_code)
 
     except:
       return Response(
@@ -398,9 +398,9 @@ class ReturnPowerBankCallBack(APIView):
             post_body={
               'headings': {'en': 'Return Buttery'},
               'contents': {
-                'en': 'You returned the buttery succesfully.' + 
-                    ' PowerBank: ' + power_bank_sn + ', ' +
-                    ' SlotNumber: ' + slot_num + '.'
+                'en': 'You returned the buttery succesfully.. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
+                  power_bank_sn=power_bank_sn, slot_num=slot_num
+                )
               },
               'data': {
                 'type': 'RETURN_BATTERY',
