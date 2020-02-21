@@ -37,5 +37,5 @@ class RentalRequestAdmin(admin.ModelAdmin):
         'user_uuid', 'device_type',
         'created_at','updated_at'
     )
-    list_filter = ('trade_no', 'station_sn', 'status', 'user_uuid', 'device_type')
+    list_filter = ('station_sn', 'status', 'user_uuid', 'device_type')
     list_per_page = 50
