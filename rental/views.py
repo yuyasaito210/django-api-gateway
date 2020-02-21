@@ -369,7 +369,7 @@ class ReturnPowerBankCallBack(APIView):
     '''
     Callback API of lend cabinet
     '''
-    print('==== lend callback: request_data: ', request.data)
+    print('==== return_powerbank callback: request_data: ', request.data)
     response_code = int(request.data['code'])
     if response_code == 200:
       # Get data from request
