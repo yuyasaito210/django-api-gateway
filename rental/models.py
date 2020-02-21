@@ -45,26 +45,23 @@ class OneSignalSetting(models.Model):
 
 class RentalRequest(models.Model):
     REQUIRED_RENT = 'REQUIRED_RENT'
+    RENT_FAILED = 'RENT_FAILED'
     RENTED = 'RENTED'
     REQUIRED_RETURN = 'RENTED'
     RETURNED = 'REQUIRED_RETURN'
     STATUS_CHOICES = [
         (REQUIRED_RENT, 'Required to rent a buttery'),
         (RENTED, 'Rented a buttery'),
+        (RENT_FAILED, 'Failed to rent'),
         (REQUIRED_RETURN, 'Required to return the buttery'),
         (RETURNED, 'Returned the buttery')
     ]
     station_sn = models.CharField(max_length=32, blank=False, default='')
     user_uuid = models.CharField(max_length=128, blank=False, default='')
     device_type = models.CharField(max_length=10, blank=False, default='ios')
-    trade_no = models.CharField(max_length=32, blank=False, default='')
+    trade_no = models.CharField(max_length=32, blank=True, default='')
     slot_id = models.IntegerField(blank=True, default=-1)
     power_bank_sn = models.CharField(max_length=32, blank=False, default='')
-    fcm_device = models.OneToOneField(
-        FCMDevice,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
     onesignal_user_id = models.CharField(max_length=255, blank=False, default='')
     status = models.CharField(
         max_length=60,
