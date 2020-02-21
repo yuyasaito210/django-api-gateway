@@ -316,7 +316,7 @@ class ReturnPowerBank(APIView):
     station_sn = request.data['stationSn']
     trade_no = request.data['tradeNo']
     push_token = request.data['pushToken']
-    slot_num = request.data['slot_num']
+    slot_num = request.data['slotNum']
     uuid = request.data['uuid']
     onesignal_user_id = request.data['onesignalUserId']
     
