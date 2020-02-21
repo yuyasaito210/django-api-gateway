@@ -57,7 +57,7 @@ class RentalRequest(models.Model):
     station_sn = models.CharField(max_length=32, blank=False, default='')
     user_uuid = models.CharField(max_length=128, blank=False, default='')
     device_type = models.CharField(max_length=10, blank=False, default='ios')
-    trade_no = models.CharField(max_length=32, blank=False, default='')
+    trade_no = models.CharField(max_length=32, blank=True, default='')
     slot_id = models.IntegerField(blank=True, default=-1)
     power_bank_sn = models.CharField(max_length=32, blank=False, default='')
     fcm_device = models.OneToOneField(
