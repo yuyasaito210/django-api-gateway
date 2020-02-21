@@ -159,21 +159,18 @@ class LendCabinet(APIView):
     )
 
     # trade_no = '{timeseconds}'.format(timeseconds=int(round(time.time() * 1000))) # Generate tradeNo uuid.
-    # trade_no = '{tradeNo}'.format(tradeNo=fcm_device.id)
+    trade_no = '{tradeNo}'.format(tradeNo=fcm_device.id)
 
     rental_request = RentalRequest.objects.create(
       station_sn = station_sn,
       user_uuid = user_uuid,
       device_type = device_type,
-      # trade_no = trade_no,
+      trade_no = trade_no,
       slot_id = 0,
       fcm_device = fcm_device,
       onesignal_user_id = onesignal_user_id,
       status = RentalRequest.REQUIRED_RENT
     )
-    trade_no = '{tradeNo}'.format(tradeNo=rental_request.id)
-    rental_request.trade_no = trade_no
-    rental_request.save()
 
     url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
     lend_callback_url = '{callback_base_url}/rental/lend_callback'.format(
