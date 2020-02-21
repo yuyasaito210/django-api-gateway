@@ -224,64 +224,65 @@ class LendCabinetCallback(APIView):
       status = RentalRequest.RENTED
       # Get rentalRequest and fcmDevice from tradeNo value
       rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
-      if rental_request and (rental_request.status != RentalRequest.RENTED):
-        # Implement OneSignal
-        onsignalSetting = OneSignalSetting.objects.all().first()
-        if onsignalSetting:
-            onesignal_client = onesignal_sdk.Client(
-              app_auth_key=onsignalSetting.app_auth_key,
-              app_id=onsignalSetting.app_id
-            )
-            if msg == 0:
-              new_notification = onesignal_sdk.Notification(
-                post_body={
-                  'headings': {'en': 'Rent Buttery'},
-                  'contents': {
-                    'en': 'You rented a buttery in station {station_sn} succesfully. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
-                      station_sn = rental_request.station_sn, power_bank_sn=power_bank_sn, slot_num=slot_num
-                    )
-                  },
-                  'data': {
-                    'type': 'RENT_BATTERY',
-                    'data': {
-                      'tradeNo': trade_no,
-                      'powerBankSn': power_bank_sn,
-                      'slotNum': slot_num,
-                      'msg': msg
-                    }
-                  },
-                  'include_player_ids': [rental_request.onesignal_user_id],
-                }
+      if rental_request:
+        if rental_request.status == RentalRequest.REQUIRED_RENT:
+          # Implement OneSignal
+          onsignalSetting = OneSignalSetting.objects.all().first()
+          if onsignalSetting:
+              onesignal_client = onesignal_sdk.Client(
+                app_auth_key=onsignalSetting.app_auth_key,
+                app_id=onsignalSetting.app_id
               )
-            else:
-              status = RentalRequest.RENT_FAILED
-              new_notification = onesignal_sdk.Notification(
-                post_body={
-                  'headings': {'en': 'Fialed To Rent Buttery'},
-                  'contents': {
-                    'en': 'You are failed to rent a buttery on the station {station_sn}. Please try again'.format(
-                      station_sn=rental_request.station_sn, slot_num=slot_num
-                    )
-                  },
-                  'data': {
-                    'type': 'FAILED_RENT_BATTERY',
+              if msg == 0:
+                new_notification = onesignal_sdk.Notification(
+                  post_body={
+                    'headings': {'en': 'Rent Buttery'},
+                    'contents': {
+                      'en': 'You rented a buttery in station {station_sn} succesfully. PowerBank: {power_bank_sn}, SlotNumber: {slot_num}'.format(
+                        station_sn = rental_request.station_sn, power_bank_sn=power_bank_sn, slot_num=slot_num
+                      )
+                    },
                     'data': {
-                      'tradeNo': trade_no,
-                      'powerBankSn': power_bank_sn,
-                      'slotNum': slot_num,
-                      'msg': msg
-                    }
-                  },
-                  'include_player_ids': [rental_request.onesignal_user_id],
-                }
-              )
-            # send notification, it will return a response
-            onesignal_response = onesignal_client.send_notification(new_notification)
-          
-        rental_request.power_bank_sn = power_bank_sn
-        rental_request.slot_id = slot_num
-        rental_request.status = status
-        rental_request.save()
+                      'type': 'RENT_BATTERY',
+                      'data': {
+                        'tradeNo': trade_no,
+                        'powerBankSn': power_bank_sn,
+                        'slotNum': slot_num,
+                        'msg': msg
+                      }
+                    },
+                    'include_player_ids': [rental_request.onesignal_user_id],
+                  }
+                )
+              else:
+                status = RentalRequest.RENT_FAILED
+                new_notification = onesignal_sdk.Notification(
+                  post_body={
+                    'headings': {'en': 'Fialed To Rent Buttery'},
+                    'contents': {
+                      'en': 'You are failed to rent a buttery on the station {station_sn}. Please try again'.format(
+                        station_sn=rental_request.station_sn, slot_num=slot_num
+                      )
+                    },
+                    'data': {
+                      'type': 'FAILED_RENT_BATTERY',
+                      'data': {
+                        'tradeNo': trade_no,
+                        'powerBankSn': power_bank_sn,
+                        'slotNum': slot_num,
+                        'msg': msg
+                      }
+                    },
+                    'include_player_ids': [rental_request.onesignal_user_id],
+                  }
+                )
+              # send notification, it will return a response
+              onesignal_response = onesignal_client.send_notification(new_notification)
+            
+          rental_request.power_bank_sn = power_bank_sn
+          rental_request.slot_id = slot_num
+          rental_request.status = status
+          rental_request.save()
 
       else:
         print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=trade_no))
