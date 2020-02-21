@@ -160,6 +160,7 @@ class LendCabinet(APIView):
       onesignal_user_id = onesignal_user_id,
       status = RentalRequest.REQUIRED_RENT
     )
+    print('===== rental_request.id: ', rental_request.id)
     trade_no = '{tradeNo}'.format(tradeNo=rental_request.id)
     rental_request.save()
 

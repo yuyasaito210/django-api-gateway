@@ -28,12 +28,12 @@ class OneSignalSettingAdmin(admin.ModelAdmin):
 @admin.register(RentalRequest)
 class RentalRequestAdmin(admin.ModelAdmin):
     list_display = (
-        'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
+        'id', 'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
         'user_uuid', 'device_type',
         'created_at','updated_at'
     )
     list_display_links = (
-        'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
+        'id', 'trade_no', 'station_sn', 'slot_id', 'status', 'power_bank_sn',
         'user_uuid', 'device_type',
         'created_at','updated_at'
     )
