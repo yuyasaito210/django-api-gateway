@@ -234,7 +234,7 @@ class LendCabinetCallback(APIView):
                 app_id=onsignalSetting.app_id
               )
               print('==== msg: ', msg)
-              if msg == 0:
+              if msg == "0":
                 print('==== send: succes notification')
                 new_notification = onesignal_sdk.Notification(
                   post_body={
