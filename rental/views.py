@@ -190,11 +190,17 @@ class LendCabinet(APIView):
       response_data = result.json()
       print('===== response_data: ', response_data)
       response_code = int(response_data['code'])
+      msg = int(response_data['msg'])
       print('===== response_code: ', response_code)
-      if response_code == 200:
+      if (response_code == 200) and (msg == 0):
         response_data['tradeNo'] = trade_no
       
-      return Response(data=response_data, status=response_code)
+        return Response(data=response_data, status=response_code)
+      else:
+        return Response(
+          data={'error': 'Middleware server have some problem now. Please try later.'},
+          status=403
+        )
 
     except:
       return Response(
@@ -220,7 +226,7 @@ class LendCabinetCallback(APIView):
       trade_no = body['tradeNo']
       power_bank_sn = body['powerBankSn']
       slot_num = int(body['slotNum'])
-      msg = body['msg']
+      msg = int(body['msg'])
       status = RentalRequest.RENTED
       # Get rentalRequest and fcmDevice from tradeNo value
       rental_request = RentalRequest.objects.filter(trade_no=trade_no).first()
@@ -234,7 +240,7 @@ class LendCabinetCallback(APIView):
                 app_id=onsignalSetting.app_id
               )
               print('==== msg: ', msg)
-              if msg == "0":
+              if msg == 0:
                 print('==== send: succes notification')
                 new_notification = onesignal_sdk.Notification(
                   post_body={
