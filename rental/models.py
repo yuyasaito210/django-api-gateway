@@ -49,12 +49,14 @@ class RentalRequest(models.Model):
     RENTED = 'RENTED'
     REQUIRED_RETURN = 'RENTED'
     RETURNED = 'REQUIRED_RETURN'
+    RETURN_FAILED = 'RETURN_FAILED'
     STATUS_CHOICES = [
         (REQUIRED_RENT, 'Required to rent a buttery'),
         (RENTED, 'Rented a buttery'),
         (RENT_FAILED, 'Failed to rent'),
         (REQUIRED_RETURN, 'Required to return the buttery'),
-        (RETURNED, 'Returned the buttery')
+        (RETURNED, 'Returned the buttery'),
+        (RETURN_FAILED, 'Failed to retur the buttery')
     ]
     station_sn = models.CharField(max_length=32, blank=False, default='')
     user_uuid = models.CharField(max_length=128, blank=False, default='')
