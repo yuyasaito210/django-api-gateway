@@ -273,11 +273,12 @@ class LendCabinetCallback(APIView):
       
       # Make notification data
       data = {
-          'tradeNo': trade_no,
-          'powerBankSn': power_bank_sn,
-          'slotNum': slot_num,
-          'msg': msg
-        }
+        'stationSn': rental_request.station_sn,
+        'tradeNo': trade_no,
+        'powerBankSn': power_bank_sn,
+        'slotNum': slot_num,
+        'msg': msg
+      }
       ids = [rental_request.onesignal_user_id]
 
       print('==== msg: ', msg)
@@ -312,6 +313,7 @@ class LendCabinetCallback(APIView):
         station_sn=rental_request.station_sn
       )
       data = {
+        'stationSn': rental_request.station_sn,
         'tradeNo': '{pk}'.format(pk=pk),
         'powerBankSn': '0',
         'slotNum': '0',
