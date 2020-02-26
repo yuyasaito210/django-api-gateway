@@ -205,7 +205,7 @@ class LendCabinet(APIView):
           'tradeNo': trade_no,
           'slotNum': 0,
           'url': lend_callback_url,
-          'timeout': 10
+          'timeout': 60
         }
     }
     headers = {
