@@ -251,7 +251,7 @@ class LendCabinetCallback(APIView):
 
     # Get sign info
     setting = RentalServerSetting.objects.all().first()
-    sign_cache = setting.sign[-4:]
+    sign_cache = setting.sign[-5:]
 
     rental_request = RentalRequest.objects.filter(id=pk).first()
     response_code = int(request.data['code'])
@@ -261,13 +261,13 @@ class LendCabinetCallback(APIView):
       # send failed notification
       response_data = sign_cache
       print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
-      return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
+      return Response(data=response_data, headers={'Content-type': 'text/plain;charset=UTF-8'}, status=200)
 
     if rental_request.status != RentalRequest.REQUIRED_RENT:
       print('===== skip the duplicated rent-buttery callbacks')
       response_data = sign_cache
       print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
-      return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
+      return Response(data=response_data, headers={'Content-type': 'text/plain;charset=UTF-8'}, status=200)
 
     status = RentalRequest.RENTED
     if response_code == 200:
@@ -336,7 +336,7 @@ class LendCabinetCallback(APIView):
     # Return 200 to rental service
     print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
     response_data = sign_cache
-    return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
+    return Response(data=response_data, headers={'Content-type': 'text/plain;charset=UTF-8'}, status=200)
 
 
 class ReturnPowerBank(APIView):
