@@ -260,12 +260,14 @@ class LendCabinetCallback(APIView):
       print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=pk))
       # send failed notification
       response_data = sign_cache
-      return Response(data=response_data, status=403)
+      print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
+      return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
 
     if rental_request.status != RentalRequest.REQUIRED_RENT:
       print('===== skip the duplicated rent-buttery callbacks')
       response_data = sign_cache
-      return Response(data=response_data, status=200)
+      print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
+      return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
 
     status = RentalRequest.RENTED
     if response_code == 200:
@@ -332,8 +334,9 @@ class LendCabinetCallback(APIView):
     rental_request.save()
 
     # Return 200 to rental service
+    print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
     response_data = sign_cache
-    return Response(data=response_data, status=response_code)
+    return Response(data=response_data, headers=[{'Content-type': 'text/plain;charset=UTF-8'}], status=200)
 
 
 class ReturnPowerBank(APIView):
