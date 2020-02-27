@@ -248,18 +248,23 @@ class LendCabinetCallback(APIView):
     Callback API of lend cabinet
     '''
     print('==== lend callback: request_data: ', request.data)
+
+    # Get sign info
+    setting = RentalServerSetting.objects.all().first()
+    sign_cache = setting.sign[-4:]
+
     rental_request = RentalRequest.objects.filter(id=pk).first()
     response_code = int(request.data['code'])
 
     if rental_request is None:
       print('====== failed to process callback. don\'t exist rental request for the tradeNo ({trade_no}) '.format(trade_no=pk))
       # send failed notification
-      response_data = {'msg': '0', 'code': '403'}
+      response_data = sign_cache
       return Response(data=response_data, status=403)
 
     if rental_request.status != RentalRequest.REQUIRED_RENT:
       print('===== skip the duplicated rent-buttery callbacks')
-      response_data = {'msg': '0', 'code': '200'}
+      response_data = sign_cache
       return Response(data=response_data, status=200)
 
     status = RentalRequest.RENTED
@@ -327,10 +332,7 @@ class LendCabinetCallback(APIView):
     rental_request.save()
 
     # Return 200 to rental service
-    response_data = {
-      'msg': '0',
-      'code': '200'
-    }
+    response_data = sign_cache
     return Response(data=response_data, status=response_code)
 
 
