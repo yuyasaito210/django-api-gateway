@@ -45,49 +45,20 @@ def send_onesignal_notification(headings, contents, data_type, data, ids):
 
 
 def RegisterReturnPowerBankCallback():
+  print('==== Setting up Return Notice.')
   setting = RentalServerSetting.objects.all().first()
   if setting is None:
-    raise Response(
-        data={
-          'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'
-        },
-        status=503
-      )
-  print('==== request.data: ', request.data)
-  station_sn = request.data['stationSn']
-  user_uuid = request.data['uuid']
-  push_token = request.data['pushToken']
-  device_type = request.data['deviceType']
-  onesignal_user_id = request.data['onesignalUserId']
+    print('===== Failed to Setting up Return Notice: did not get rental server setting.')
 
-  rental_request = RentalRequest.objects.create(
-    station_sn = station_sn,
-    user_uuid = user_uuid,
-    device_type = device_type,
-    # trade_no = trade_no,
-    slot_id = 0,
-    onesignal_user_id = onesignal_user_id,
-    status = RentalRequest.REQUIRED_RENT
-  )
-  print('===== rental_request.id: ', rental_request.id)
-  trade_no = '{tradeNo}'.format(tradeNo=rental_request.id)
-  rental_request.trade_no = trade_no
-  rental_request.save()
-
-  url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
-  lend_callback_url = '{callback_base_url}/rental/lend_callback/{request_id}'.format(
-    callback_base_url=setting.callback_base_url,
-    request_id=rental_request.id
-  )
   # Send rental request.
+  url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
+  return_powerbank_callback_url = '{callback_base_url}/rental/return_powerbank'.format(
+    callback_base_url=setting.callback_base_url
+  )
   body = {
     'sign': setting.sign,
     'body': {
-        'stationSn': station_sn,
-        'tradeNo': trade_no,
-        'slotNum': 0,
-        'url': lend_callback_url,
-        'timeout': 60
+        'url': return_powerbank_callback_url
       }
   }
   headers = {
@@ -98,25 +69,11 @@ def RegisterReturnPowerBankCallback():
   try:
     result = requests.post(url, headers=headers, json=body)
     response_data = result.json()
-    print('===== response_data: ', response_data)
-    response_code = int(response_data['code'])
-    msg = int(response_data['msg'])
-    print('===== response_code: ', response_code)
-    if (response_code == 200) and (msg == 0):
-      response_data['tradeNo'] = trade_no
-    
-      return Response(data=response_data, status=response_code)
-    else:
-      return Response(
-        data={'error': 'Middleware server have some problem now. Please try later.'},
-        status=403
-      )
+    print('===== Success to Setting up Return Notice. ', response_data)
 
   except:
-    return Response(
-      data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
-      status=403
-    )
+    print('===== Failed to Setting up Return Notice.')
+    
 
 def SendCallbackResponse():
   # Get sign info
