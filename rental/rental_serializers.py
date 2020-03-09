@@ -92,6 +92,6 @@ class SettingupReturnNoticeCallbackRequestSerializer(serializers.Serializer):
     Retime = serializers.CharField(required=True)
     ele = serializers.CharField(required=True)
 
-class SettingupReturnNoticeCallbackSerializer(serializers.Serializer):
+class SettingupReturnNoticeCallbackResponseSerializer(serializers.Serializer):
     msg = serializers.CharField(required=True)
     code = serializers.IntegerField(required=True)
