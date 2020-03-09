@@ -13,5 +13,3 @@ urlpatterns = [
     url(r'^send_push_notification', views.SendPushNotificatioin.as_view()),
     url(r'^send_fcm', views.SendFcm.as_view())
 ]
-
-views.RegisterReturnPowerBankCallback()
