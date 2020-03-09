@@ -3,6 +3,8 @@ venv
 staticfiles
 .env
 .env3
+env3
+.vscode/
 db.sqlite3
 .idea/
 .DS_Store

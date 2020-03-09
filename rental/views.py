@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from fcm_django.models import FCMDevice
 from drf_yasg.utils import swagger_auto_schema
 import onesignal as onesignal_sdk
-from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer, ReturnPowerBankRequestSerializer, ReturnPowerBankResponseSerializer, ReturnPowerBankCallbackRequestSerializer,ReturnPowerBankCallbackResponseSerializer
+from .rental_serializers import GetRentalServerResponseSerializer, GetCabinetInfoRequestionSerializer, GetCabinetInfoResponseSerializer, GetAllCabinetInfoResponseSerializer, LendCabinetRequestSerializer, LendCabinetResponseSerializer, LendCabinetCallbackRequestSerializer, LendCabinetCallbackResponseSerializer, ReturnPowerBankRequestSerializer, ReturnPowerBankResponseSerializer, ReturnPowerBankCallbackRequestSerializer, ReturnPowerBankCallbackResponseSerializer, SettingupReturnNoticeCallbackRequestSerializer, SettingupReturnNoticeCallbackResponseSerializer
 from .push_notification_serializers import SendPushNotificationRequestionSerializer, SendPushNotificationResponseSerializer, SendFcmRequestionSerializer, SendFcmResponseSerializer
 from mailjet_rest import Client
 from .models import RentalServerSetting, RentalRequest, OneSignalSetting
@@ -43,6 +43,89 @@ def send_onesignal_notification(headings, contents, data_type, data, ids):
     )
     onesignal_response = onesignal_client.send_notification(new_notification)
 
+
+def RegisterReturnPowerBankCallback():
+  setting = RentalServerSetting.objects.all().first()
+  if setting is None:
+    raise Response(
+        data={
+          'error': 'API gateway don\'t have any rental service settings, yet. Please contact administrator.'
+        },
+        status=503
+      )
+  print('==== request.data: ', request.data)
+  station_sn = request.data['stationSn']
+  user_uuid = request.data['uuid']
+  push_token = request.data['pushToken']
+  device_type = request.data['deviceType']
+  onesignal_user_id = request.data['onesignalUserId']
+
+  rental_request = RentalRequest.objects.create(
+    station_sn = station_sn,
+    user_uuid = user_uuid,
+    device_type = device_type,
+    # trade_no = trade_no,
+    slot_id = 0,
+    onesignal_user_id = onesignal_user_id,
+    status = RentalRequest.REQUIRED_RENT
+  )
+  print('===== rental_request.id: ', rental_request.id)
+  trade_no = '{tradeNo}'.format(tradeNo=rental_request.id)
+  rental_request.trade_no = trade_no
+  rental_request.save()
+
+  url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
+  lend_callback_url = '{callback_base_url}/rental/lend_callback/{request_id}'.format(
+    callback_base_url=setting.callback_base_url,
+    request_id=rental_request.id
+  )
+  # Send rental request.
+  body = {
+    'sign': setting.sign,
+    'body': {
+        'stationSn': station_sn,
+        'tradeNo': trade_no,
+        'slotNum': 0,
+        'url': lend_callback_url,
+        'timeout': 60
+      }
+  }
+  headers = {
+    'Content-type': 'application/json'
+  }
+  print('==== url: ', url)
+  print('==== body: ', body)
+  try:
+    result = requests.post(url, headers=headers, json=body)
+    response_data = result.json()
+    print('===== response_data: ', response_data)
+    response_code = int(response_data['code'])
+    msg = int(response_data['msg'])
+    print('===== response_code: ', response_code)
+    if (response_code == 200) and (msg == 0):
+      response_data['tradeNo'] = trade_no
+    
+      return Response(data=response_data, status=response_code)
+    else:
+      return Response(
+        data={'error': 'Middleware server have some problem now. Please try later.'},
+        status=403
+      )
+
+  except:
+    return Response(
+      data={'error': 'API gateway cann\'t send rental request to middleware server. Please try later.'},
+      status=403
+    )
+
+def SendCallbackResponse():
+  # Get sign info
+  setting = RentalServerSetting.objects.all().first()
+  sign_cache = setting.sign[-5:]
+  # send failed notification
+  response_data = sign_cache
+  print("==== send response with sign_cache {sign_cache} to callback request.".format(sign_cache=sign_cache))
+  return Response(data=response_data, headers={'Content-type': 'text/plain;charset=UTF-8'}, status=200)
 
 class GetRentalServer(APIView):
   @swagger_auto_schema(
@@ -487,6 +570,86 @@ class ReturnPowerBankCallBack(APIView):
       'code': '200'
     }
     return Response(data=response_data, status=response_code)
+
+
+class SettingupReturnNoticeCallback(APIView):
+  @swagger_auto_schema(
+    request_body=SettingupReturnNoticeCallbackRequestSerializer,
+    responses={200: SettingupReturnNoticeCallbackResponseSerializer(many=False)}
+  )
+  def post(self, request, format=None):
+    '''
+    Callback API of Setting up Return Notice
+    '''
+    data = request.data
+    print('==== Return Notice callback: request_data: ', data)
+    code = data['code']
+    rsCode = data['rsCode']
+    powerBankSn = data['powerBankSn']
+    slotNum = int(data['slotNum'])
+    stationNo = data['stationNo']
+
+    rental_request = RentalRequest.objects.filter(
+      power_bank_sn=powerBankSn, slot_id=slotNum
+    ).first()
+    if rental_request is None:
+      print('====== Failed to return buttery. The statinSn ({stationNo}) and slotNum({slotNum}) do not exist in request list.'.format(
+        stationNo=stationNo, slotNum=slotNum
+      ))
+      return SendCallbackResponse()
+
+    if (code == 200) and (rsCode == "1"):
+      # success and send notification to app
+      linestatus = data['linestatus']
+      lockstatus = data['lockstatus']
+      retTime = data['Retime']
+      ele = data['ele']
+      msg = data['msg']
+      # Check duplcation
+      if rental_request.status == RentalRequest.RETURNED:
+        print('====== skip the duplicated return_buttery callback')
+        return SendCallbackResponse()
+
+      # Make notification data
+      ids = [rental_request.onesignal_user_id]
+      print('==== msg: ', msg)
+      if msg == 0:
+        headings = 'Return Buttery'
+        data_type = 'RETURNED'
+        contents = 'You returned the buttery succesfully. PowerBankSn: {powerBankSn}, SlotNumber: {slotNum}'.format(
+          powerBankSn=powerBankSn, slotNum=slotNum
+        )
+        print('==== send: success notification')
+        send_onesignal_notification(headings, contents, data_type, data, ids)
+        status = RentalRequest.RETURNED
+      else:
+        headings = 'Fialed To Return Buttery'
+        data_type = 'FAILED_RETURN_BATTERY'
+        contents = 'You are failed to return the buttery on the powerBankSn {power_bank_sn}. Please try again'.format(
+          power_bank_sn=rental_request.power_bank_sn
+        )
+        print('==== send: failed notification')
+        send_onesignal_notification(headings, contents, data_type, data, ids)
+        status = RentalRequest.RETURN_FAILED
+    else:
+      # send failed notification
+      headings = 'Fialed To Return Buttery'
+      data_type = 'FAILED_RETURN_BATTERY'
+      contents = 'You are failed to return the buttery on the powerBankSn {power_bank_sn}. Please try again'.format(
+        power_bank_sn=rental_request.power_bank_sn
+      )
+      data = {
+        'stationSn': rental_request.power_bank_sn,
+        'slotNum': rental_request.slot_id,
+      }
+      ids = [rental_request.onesignal_user_id]
+      send_onesignal_notification(headings, contents, data_type, data, ids)
+      status = RentalRequest.RENT_FAILED
+
+    rental_request.status = status
+    rental_request.save
+
+    return SendCallbackResponse()
 
 
 class SendPushNotificatioin(APIView):

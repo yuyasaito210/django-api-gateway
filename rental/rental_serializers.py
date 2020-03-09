@@ -79,3 +79,19 @@ class ReturnPowerBankCallbackRequestSerializer(serializers.Serializer):
 class ReturnPowerBankCallbackResponseSerializer(serializers.Serializer):
     msg = serializers.CharField(required=True)
     code = serializers.IntegerField(required=True)
+
+class SettingupReturnNoticeCallbackRequestSerializer(serializers.Serializer):
+    msg = serializers.IntegerField(required=True)
+    powerBankSn = serializers.CharField(required=True)
+    slotNum = serializers.CharField(required=True)
+    code = serializers.IntegerField(required=True)
+    rsCode = serializers.IntegerField(required=True)
+    stationNo = serializers.CharField(required=True)
+    linestatus = serializers.CharField(required=True)
+    lockstatus = serializers.CharField(required=True)
+    Retime = serializers.CharField(required=True)
+    ele = serializers.CharField(required=True)
+
+class SettingupReturnNoticeCallbackSerializer(serializers.Serializer):
+    msg = serializers.CharField(required=True)
+    code = serializers.IntegerField(required=True)
