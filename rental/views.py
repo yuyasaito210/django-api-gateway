@@ -453,7 +453,7 @@ class ReturnPowerBankCallBack(APIView):
     '''
     Callback API of lend cabinet
     '''
-    print('==== return_powerbank callback: request_data: ', request.data || request.body)
+    print('==== return_powerbank callback: request_data: ', request.data or request.body)
     rental_request = RentalRequest.objects.filter(id=pk).first()
     response_code = int(request.data['code'])
 
