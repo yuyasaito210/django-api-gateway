@@ -51,7 +51,7 @@ def RegisterReturnPowerBankCallback():
     print('===== Failed to Setting up Return Notice: did not get rental server setting.')
 
   # Send rental request.
-  url = '{base_url}/api/srv/lend'.format(base_url=setting.url)
+  url = '{base_url}/api/srv/setupBaction'.format(base_url=setting.url)
   return_powerbank_callback_url = '{callback_base_url}/rental/return_powerbank'.format(
     callback_base_url=setting.callback_base_url
   )
